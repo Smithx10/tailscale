@@ -57,7 +57,7 @@ specify any flags, options are reset to their default.
 		upf.StringVar(&upArgs.authKey, "authkey", "", "node authorization key")
 		upf.StringVar(&upArgs.hostname, "hostname", "", "hostname to use instead of the one provided by the OS")
 		upf.BoolVar(&upArgs.enableDERP, "enable-derp", true, "enable the use of DERP servers")
-		if runtime.GOOS == "linux" || isBSD(runtime.GOOS) || version.OS() == "macOS" {
+		if runtime.GOOS == "linux" || isBSD(runtime.GOOS) || version.OS() == "macOS" || runtime.GOOS == "illumos" {
 			upf.StringVar(&upArgs.advertiseRoutes, "advertise-routes", "", "routes to advertise to other nodes (comma-separated, e.g. 10.0.0.0/8,192.168.0.0/24)")
 		}
 		if runtime.GOOS == "linux" {
@@ -119,6 +119,18 @@ func warnf(format string, args ...interface{}) {
 // enabled, or if we were unable to verify the state of IP forwarding.
 func checkIPForwarding() {
 	var key string
+
+	if runtime.GOOS == "illumos" {
+                ipadmCmd := "\"ipadm show-prop ipv4 -p forwarding -o CURRENT -c\""
+		bs, err := exec.Command("ipadm", "show-prop", "ipv4", "-p", "forwarding", "-o", "CURRENT", "-c").Output()
+		if err != nil {
+			warnf("couldn't check %s (%v).\nSubnet routes won't work without IP forwarding.", ipadmCmd, err)
+			return
+		}
+		if string(bs) != "on\n" {
+			warnf("%s is set to off. Subnet routes won't work.", ipadmCmd)
+		}
+	}
 
 	if runtime.GOOS == "linux" {
 		key = "net.ipv4.ip_forward"

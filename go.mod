@@ -38,3 +38,4 @@ require (
 )
 
 replace github.com/tailscale/wireguard-go => /home/admin/wireguard-go
+

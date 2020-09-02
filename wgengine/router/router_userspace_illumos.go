@@ -16,6 +16,9 @@ import (
 	"tailscale.com/types/logger"
 	"tailscale.com/version"
 	"tailscale.com/wgengine/router/dns"
+	"os/exec"
+	"log"
+
 )
 
 type userspaceIllumosRouter struct {
@@ -25,6 +28,14 @@ type userspaceIllumosRouter struct {
 	routes  map[netaddr.IPPrefix]struct{}
 
 	dns *dns.Manager
+}
+
+
+func cmd(args ...string) *exec.Cmd {
+        if len(args) == 0 {
+                log.Fatalf("exec.Cmd(%#v) invalid; need argv[0]\n", args)
+        }
+        return exec.Command(args[0], args[1:]...)
 }
 
 func newUserspaceIllumosRouter(logf logger.Logf, _ *device.Device, tundev tun.Device) (Router, error) {

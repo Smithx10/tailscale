@@ -11,7 +11,6 @@ import (
 )
 
 // For now this router only supports the userspace WireGuard implementations.
-
 func newUserspaceRouter(logf logger.Logf, _ *device.Device, tundev tun.Device) (Router, error) {
 	return newUserspaceIllumosRouter(logf, nil, tundev)
 }
